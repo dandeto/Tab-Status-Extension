@@ -1,0 +1,112 @@
+@font-face {
+  font-family: Exo;
+  src: url(Exo2-Regular.ttf);
+}
+
+body {
+	font-family: Exo;
+	background: #222;
+	color: #eee;
+	width: 750px;
+}
+
+span {
+	font-size: 150%;
+	cursor: pointer;
+	user-select: none;
+	display: inline-block;
+	margin: 0px;
+	width: 50px;
+	text-align: center;
+	background: transparent;
+	transition: background .2s, color .2s;
+}
+
+span:hover {
+	background: #ded;
+	color: #000;
+	transition: background .2s, color .2s;
+}
+
+div {
+	margin: 25px;
+	transition: height .3s;
+}
+
+.container {
+	display: none;
+}
+
+p {
+	font-size: 150%;
+	cursor: pointer;
+	user-select: none;
+	color: #0af;
+	width: 100px;
+	transition: color .3s;
+}
+
+.symbols {
+	margin-left: 0;
+}
+
+button {
+	font-family: Exo;
+	border-radius: 3px 3px 3px 3px;
+	border: 1px solid black;
+	outline: none;
+	background: #0af;
+	transition: background .3s, border-radius .3s;
+	cursor: pointer;
+	font-size: 150%;
+}
+
+button:hover {
+	background: #fa0;
+	border-radius: 10px 0 10px 0;
+	transition: background .3s, border-radius .3s;
+}
+
+input {
+	font-family: Exo;
+	font-size: 150%;
+	background: transparent;
+	outline: none;
+	border: 1px solid #0af;
+	transition: border .3s, border-radius .3s;
+	color: white;
+	padding-left: 5px;
+}
+
+input:hover {
+	border: 1px solid #fa0;
+	border-radius: 5px;
+	transition: border .3s, border-radius .3s;
+}
+
+input:active {
+	border: 1px solid #fa0;
+	border-radius: 5px;
+}
+
+ul {
+	display: none;
+	position: absolute;
+	font-size: 150%;
+	border: 1px solid black;
+	box-shadow: 2px 2px 2px black;
+	cursor: pointer;
+	list-style-type:none;
+	padding: 0;
+}
+
+li {
+	color: #000;
+	padding: 10px;
+	background-color: #0af;
+	margin: 0;
+}
+
+li:hover {
+	background-color: #fa0;
+}
