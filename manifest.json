@@ -5,7 +5,6 @@
   "short_name": "Tab Status",
   "description": "stuff",
   "version": "1.0.0",
-  "offline_enabled": true,
   "permissions": [
     "storage",
     "tabs",

@@ -11,19 +11,22 @@ function store(key, val) {
 // set the status of current tab with a symbol
 function status() {
 	var title;
-	var text = this.textContent; // capture this context of element
-	chrome.tabs.getSelected(null,function(tab) { // null defaults to current window
-	  title = tab.title.split(' ');
+	var text = this.textContent; // capture text of element
 
-	  if(set) title[0] = text;
-		else    title.unshift(text);
-		set = true;
+	browser.tabs.query({active: true}).then(tabs => {
+		for (let tab of tabs) {
+			title = tab.title.split(' ');
 
-		store(tab.url, title.join(" "));
+			if(set) title[0] = text;
+			else    title.unshift(text);
+			set = true;
 
-		chrome.tabs.executeScript({
-	    code: "document.title = '" + title.join(" ") + "'"
-	  });
+			store(tab.url, title.join(" "));
+
+			browser.tabs.executeScript({
+				code: "document.title = '" + title.join(" ") + "'"
+			});
+		}
 	});
 }
 
@@ -32,8 +35,8 @@ function menu(e) {
 	var menu = document.querySelector("ul");
 	menu.style.display = "block";
 	menu.style.left = e.clientX + "px";
-  menu.style.top = e.clientY + "px";
-  deleteSymbol = e.target;
+	menu.style.top = e.clientY + "px";
+	deleteSymbol = e.target;
 }
 
 // add to span and save
@@ -72,17 +75,18 @@ document.querySelector(".clear").addEventListener("click", () => {
 // remove status button
 document.querySelector(".remove").addEventListener("click", () => {
 	if(set) {
-		chrome.tabs.getSelected(null,function(tab) { // null defaults to current window
-		  title = tab.title.split(' ');
+		browser.tabs.query({active: true}).then(tabs => {
+			for (let tab of tabs) {
+				title = tab.title.split(' ');
 
-		  title[0] = '';
-			set = false;
+			  title[0] = '';
+				set = false;
+				chrome.storage.local.remove(tab.url);
 
-			chrome.storage.local.remove(tab.url);
-
-			chrome.tabs.executeScript({
-		    code: "document.title = '" + title.join(" ") + "'"
-		  });
+				browser.tabs.executeScript({
+					code: "document.title = '" + title.join(" ") + "'"
+				});
+			}
 		});
 	}
 });
@@ -127,6 +131,6 @@ function getUserCharacters() {
 }
 
 window.onload = function() {
-	chrome.tabs.getSelected(null, tab => retrieve(tab.url));
+	browser.tabs.query({active: true}).then(tabs => { for (let tab of tabs) retrieve(tab.url) });
 	getUserCharacters();
 }
