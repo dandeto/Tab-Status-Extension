@@ -1,33 +1,22 @@
-var set = false;
-var deleteSymbol;
+var set = false,
+    deleteSymbol;
 
+// store to localstorage
 function store(key, val) {
 	var obj= {};
 	obj[key] = val;
 	chrome.storage.local.set(obj);
 }
 
-function retrieve(key) {
-	chrome.storage.local.get(key, function(result) {
-		console.log(result);
-		if (result[key] !== undefined) {
-			set = true;
-
-			chrome.tabs.executeScript({
-		    code: "document.title = '" + result[key] + "'"
-		  });
-		}
-	});
-}
-
+// set the status of current tab with a symbol
 function status() {
 	var title;
-	var self = this;
+	var text = this.textContent; // capture this context of element
 	chrome.tabs.getSelected(null,function(tab) { // null defaults to current window
 	  title = tab.title.split(' ');
 
-	  if(set) title[0] = self.textContent;
-		else    title.unshift(self.textContent)
+	  if(set) title[0] = text;
+		else    title.unshift(text);
 		set = true;
 
 		store(tab.url, title.join(" "));
@@ -38,6 +27,7 @@ function status() {
 	});
 }
 
+// display context menu
 function menu(e) {
 	var menu = document.querySelector("ul");
 	menu.style.display = "block";
@@ -45,32 +35,6 @@ function menu(e) {
   menu.style.top = e.clientY + "px";
   deleteSymbol = e.target;
 }
-
-function getUserCharacters() {
-	chrome.storage.local.get("user", function(result) {
-		if (result.user !== undefined) {
-			document.querySelector(".symbols").innerHTML = result.user;
-			document.querySelectorAll("span").forEach(e => e.addEventListener("click", status));
-			document.querySelectorAll(".symbols").forEach(e => e.addEventListener("contextmenu", e => menu(e)));
-		}
-	});
-}
-
-document.querySelectorAll("p").forEach(e => e.addEventListener("click", function() {
-	if(this.nextElementSibling.style.display == "block") {
-		this.nextElementSibling.style.display = "none";
-		this.style.color = "#0af";
-	}
-	else {
-		this.nextElementSibling.style.display = "block";
-		this.style.color = "#fa0";
-	}
-}));
-
-document.querySelector(".clear").addEventListener("click", () => {
-	chrome.storage.local.clear();
-	alert("data cleared")
-});
 
 // add to span and save
 function add() {
@@ -85,15 +49,82 @@ function add() {
 	document.querySelector("input").value = ' '; // clear input
 }
 
+// UI
+
+// collapsable titles
+document.querySelectorAll("p").forEach(e => e.addEventListener("click", function() {
+	if(this.nextElementSibling.style.display == "block") {
+		this.nextElementSibling.style.display = "none";
+		this.style.color = "#0af";
+	}
+	else {
+		this.nextElementSibling.style.display = "block";
+		this.style.color = "#fa0";
+	}
+}));
+
+// clear button
+document.querySelector(".clear").addEventListener("click", () => {
+	chrome.storage.local.clear();
+	alert("data cleared")
+});
+
+// remove status button
+document.querySelector(".remove").addEventListener("click", () => {
+	if(set) {
+		chrome.tabs.getSelected(null,function(tab) { // null defaults to current window
+		  title = tab.title.split(' ');
+
+		  title[0] = '';
+			set = false;
+
+			chrome.storage.local.remove(tab.url);
+
+			chrome.tabs.executeScript({
+		    code: "document.title = '" + title.join(" ") + "'"
+		  });
+		});
+	}
+});
+
+// delete contextmenu option
+document.querySelector("ul").addEventListener("click", function(e) {
+	deleteSymbol.remove();
+	chrome.storage.local.set({"user": document.querySelector(".symbols").innerHTML});
+});
+
+// one-liners
 document.querySelector(".add").addEventListener("click", add);
 document.querySelector("input").addEventListener("keyup", function(e) { if(e.keyCode == 13) add()});
 document.addEventListener("contextmenu", e => e.preventDefault());
 document.body.addEventListener("click", () => document.querySelector("ul").style.display = "none");
 document.body.addEventListener("keyup", e => { if ( e.keyCode === 27 ) document.querySelector("ul").display = "none" });
-document.querySelector("ul").addEventListener("click", function(e) {
-	deleteSymbol.remove();
-	chrome.storage.local.set({"user": document.querySelector(".symbols").innerHTML});
-});
+
+// INITIALIZATION
+
+// get this tab's data from localstorage
+function retrieve(key) {
+	chrome.storage.local.get(key, function(result) {
+		if (result[key] !== undefined) {
+			set = true;
+
+			chrome.tabs.executeScript({
+		    code: "document.title = '" + result[key] + "'"
+		  });
+		}
+	});
+}
+
+// get symbols defined by user from localstorage
+function getUserCharacters() {
+	chrome.storage.local.get("user", function(result) {
+		if (result.user !== undefined) {
+			document.querySelector(".symbols").innerHTML = result.user;
+			document.querySelectorAll("span").forEach(e => e.addEventListener("click", status));
+			document.querySelectorAll(".symbols").forEach(e => e.addEventListener("contextmenu", e => menu(e)));
+		}
+	});
+}
 
 window.onload = function() {
 	chrome.tabs.getSelected(null, tab => retrieve(tab.url));
